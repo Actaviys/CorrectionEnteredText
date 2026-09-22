@@ -144,6 +144,7 @@ func main() {
 		Show()
 	// Запуск програми
 	log.Println("Successfully launched: `" + app_Name + "`")
+	app_tray.ShowNotification(app_Name, "Програма працює")
 	if app_tray.Run() != nil {
 		log.Fatalf("Failed to launch system tray!!!")
 	}
