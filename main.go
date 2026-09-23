@@ -6,9 +6,11 @@ import (
 	"os" // Для правильного завершення роботи програми
 
 	"github.com/gogpu/systray" // Для створення програми для системного лотка
+	"golang.design/x/hotkey" // Для роботи з глобальними комбінаціями клавіш
 )
 
-
+//////////////////////////////////////////////////////////////////////
+////////////////////////// Системний лоток ///////////////////////////
 // Назва програми
 const app_Name = "Correction of entered text"
 /* Для підтягування іконки */
@@ -43,7 +45,7 @@ func funcProgramExecutionStatus() {
 	status_text += "\nЧас роботи: "
 
 	app_tray.ShowNotification(app_Name, status_text)
-	log.Println("Program execution status: ", status_text)
+	log.Println("Program execution status: ", status_text, ".")
 }
 
 
@@ -91,46 +93,126 @@ func AddingItemsToRootMenu() {
 	checkbox_UA_to_ENG = menu_root.AddCheckbox("UA -> ENG", false, funcCheckboxCheck_root)
 	menu_root.AddSeparator()
 
+	
+	// menu_root.AddSeparator()
+	// menu_root.Add("Довідка", nil)
+
 	menu_additionally := systray.NewMenu()
-	checkbox_notification = menu_additionally.AddCheckbox("Сповіщення  - увім -", notification_activity, func() {
+	checkbox_notification = menu_additionally.AddCheckbox("• Сповіщення  - увім -", notification_activity, func() {
 		notification_activity = !notification_activity
 		checkbox_notification.SetChecked(notification_activity)
 		if notification_activity {
-			checkbox_notification.SetLabel("Сповіщення  - увім -")
+			checkbox_notification.SetLabel("• Сповіщення  - увім -")
 		} else {
-			checkbox_notification.SetLabel("Сповіщення  - вимк -")
+			checkbox_notification.SetLabel("• Сповіщення  - вимк -")
 		}
 	})
 	menu_additionally.AddSeparator()
 	menu_additionally.Add("Статус роботи", funcProgramExecutionStatus)
 
+	menu_additionally.AddSeparator()
+	menu_additionally.Add("Довідка", nil)
+
 	menu_root.AddSubmenu("Додатково", menu_additionally)
-	
-	menu_root.AddSeparator()
-	menu_root.Add("Довідка", nil)
 
 	menu_root.AddSeparator()
 	menu_root.Add("Вихід", ClosesProgram)
 }
 
 
-
 // Функція для обробки подвійного натиску
 func funcCheckOnDoubleClick() {
-	log.Println("Double-click the application")
+	log.Println("Double-click the application.")
 	if notification_activity == true {
 		funcProgramExecutionStatus()
 	}
 }
+////////////////////////// --------------- ///////////////////////////
+//////////////////////////////////////////////////////////////////////
 
 
+
+
+
+
+//////////////////////////////////////////////////////////////////////
+///////////////////////// Комбінації клавіш //////////////////////////
+func WorksGlobalHotkeys() {
+	// Ctrl + F12 (Для закриття програми)
+	hk_CtrlF12 := hotkey.New(
+		[]hotkey.Modifier{hotkey.ModCtrl},
+		hotkey.KeyF12,
+	)
+	if err := hk_CtrlF12.Register(); err != nil {
+		log.Fatalf("Failed to register Ctrl+F12: %v.", err)
+	} else {
+		log.Println("The Ctrl+F12 hotkey is registered.")
+	}
+
+	// Ctrl + Delete (Для виправлення тексту)
+	hk_CtrlDel := hotkey.New(
+		[]hotkey.Modifier{hotkey.ModCtrl},
+		hotkey.KeyDelete,
+	)
+	if err := hk_CtrlDel.Register(); err != nil {
+		log.Fatalf("Failed to register Ctrl+Del: %v.", err)
+	} else {
+		log.Println("The Ctrl+Del hotkey is registered.")
+	}
+
+	// Ctrl + Insert (Для реверсу виправлення)
+	hk_CtrlIns := hotkey.New(
+		[]hotkey.Modifier{hotkey.ModCtrl},
+		0x2d, // Insert
+	)
+	if err := hk_CtrlIns.Register(); err != nil {
+		log.Fatalf("Failed to register Ctrl+Ins: %v.", err)
+	}
+	log.Println("The Ctrl+Ins hotkey is registered.")
+
+	// Слухаємо всі комбінації клавіш
+	for {
+		select {
+			case <- hk_CtrlF12.Keydown(): // Закриття програми
+				log.Println("Pressed Ctrl+F12.")
+				ClosesProgram()
+			case <- hk_CtrlDel.Keydown(): // Виправлення тексту
+				log.Println("Pressed Ctrl+Del.")
+			case <- hk_CtrlIns.Keydown(): // Реверс виправлення
+				log.Println("Pressed Ctrl+Ins.")
+		}
+	}
+}
+
+func TextCorrection() {}
+func WorkingWithSelectedText() {}
+///////////////////////// ----------------- //////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+////////////////////////// ---- MAIN ---- ////////////////////////////
 func main() {
 	log.Println("`" + app_Name + "`")
 	log.Println("launching...")
 
+	// Запуск роботи комбінацій клавіш у додатковому потоці
+	go WorksGlobalHotkeys()
+
 	// Додавання елементів до меню
 	AddingItemsToRootMenu()
-	log.Println("Items added to the menu")
+	log.Println("Items added to the menu.")
 
 
 	// Додавання параметрів роботи системного лотка
@@ -142,9 +224,9 @@ func main() {
 		OnDoubleClick(funcCheckOnDoubleClick).
 		OnClick(nil).
 		Show()
-	// Запуск програми
-	log.Println("Successfully launched: `" + app_Name + "`")
-	app_tray.ShowNotification(app_Name, "Програма працює")
+	// Запуск системного лотка
+	log.Println("Successfully launched: `" + app_Name + "`.")
+	app_tray.ShowNotification(app_Name, "Програма працює.")
 	if app_tray.Run() != nil {
 		log.Fatalf("Failed to launch system tray!!!")
 	}
