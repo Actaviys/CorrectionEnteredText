@@ -7,6 +7,8 @@
 - `Ctrl + Delete` -> Виправлення
 - `Ctrl + Insert` -> Реверс виправлення
 
+<a href="https://github.com/Actaviys/CorrectionEnteredText/blob/main/docs/GUIDE.md">Інструкція</a>
+
 ---
 
 ### Налаштування робочого середовища
@@ -16,10 +18,9 @@
 Завантаження бібліотек: \
 `go get github.com/gogpu/systray` - Для створення програми для системного лотка \
 `go get golang.design/x/hotkey` - Для роботи з глобальними комбінаціями клавіш \
-
-`go get golang.design/x/clipboard` \
-`go get github.com/micmonay/keybd_event` \
-`go get github.com/pkg/browser` \
+`go get github.com/micmonay/keybd_event` - Для роботи з симуляцією натискання клавіш\
+`go get golang.design/x/clipboard` - Для роботи з глобальним буфером\
+`go get github.com/pkg/browser` - Для відривання посилань
 
 `go install github.com/akavel/rsrc@latest` -> Потрібна для створення іконки для .exe файла.
 
